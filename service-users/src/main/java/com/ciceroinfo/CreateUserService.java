@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 
 public class CreateUserService<T> {
 
-    private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
     private final Connection connection;
 
     public CreateUserService() throws SQLException {
@@ -39,14 +38,16 @@ public class CreateUserService<T> {
         }
     }
 
-    private void parse(ConsumerRecord<String, Order> record) throws ExecutionException, InterruptedException, SQLException {
+    private void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException,
+            SQLException {
         System.out.println("----------------------------");
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Processing USER: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
         System.out.println("User processed");
         System.out.println("----------------------------");
 
-        var order = record.value();
+        var message = record.value();
+        var order = message.getPayload();
 
         if (isNewUser(order.getEmail())) {
             insertNewUser(order.getEmail());

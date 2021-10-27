@@ -10,17 +10,18 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderServlet extends HttpServlet {
-
+    
     KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
     KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
-
+    
     @Override
     public void destroy() {
         super.destroy();
-        orderDispatcher.close();;
+        orderDispatcher.close();
+        ;
         emailDispatcher.close();
     }
-
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -30,12 +31,12 @@ public class NewOrderServlet extends HttpServlet {
             var amount = new BigDecimal(req.getParameter("amount"));
             var email = req.getParameter("email");
             var order = new Order(email, orderId, amount);
-
-            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order);
-
+            
+            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), order);
+            
             String emailCode = "Thank you for order! We are processing your order!";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailCode);
-
+            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), emailCode);
+            
             System.out.println("New order sent successfully");
             resp.setStatus(HttpServletResponse.SC_CREATED);
             resp.getWriter().println("New order sent successfully");

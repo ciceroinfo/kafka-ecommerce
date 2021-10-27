@@ -17,7 +17,7 @@ public class ReadingReportService<T> {
     public static void main(String[] args) {
         var readingReportService = new ReadingReportService();
         try (var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
-                "USER_GENERATE_READING_REPORT",
+                "ECOMMERCE_USER_GENERATE_READING_REPORT",
                 readingReportService::parse,
                 User.class,
                 Map.of())) {
@@ -25,13 +25,14 @@ public class ReadingReportService<T> {
         }
     }
 
-    private void parse(ConsumerRecord<String, User> record) throws ExecutionException, InterruptedException, IOException {
+    private void parse(ConsumerRecord<String, Message<User>> record) throws ExecutionException, InterruptedException,
+            IOException {
         System.out.println("----------------------------");
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Processing REPORT: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
 
-        var user = record.value();
-
+        var message = record.value();
+        var user = message.getPayload();
 
         var target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);
