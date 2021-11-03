@@ -29,7 +29,7 @@ public class BatchSendMessageService {
         }
     }
     
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
         var batchService = new BatchSendMessageService();
         try (var service = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
                 "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS",
@@ -41,15 +41,18 @@ public class BatchSendMessageService {
     
     private void parse(ConsumerRecord<String, Message<String>> record) throws ExecutionException, InterruptedException,
             SQLException {
-        System.out.println("----------------------------");
+        System.out.println("----------------------------Async Mode");
         var message = record.value();
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Processing BATCH: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
         
+        if (Math.random() < 0.5) throw new RuntimeException("deu erro que eu forcei");
+        
         for (User user : getAllUsers()) {
-            userDispatcher.send(message.getPayload(), user.getUuid(),
+            userDispatcher.sendAsync(message.getPayload(), user.getUuid(),
                     message.getId().continueWith(BatchSendMessageService.class.getSimpleName()),
                 user);
+            System.out.println("Acho que enviei para " + user);
         }
         
         System.out.println("batch processed");
