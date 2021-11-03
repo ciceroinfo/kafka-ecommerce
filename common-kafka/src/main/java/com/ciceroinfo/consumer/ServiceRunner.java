@@ -1,4 +1,4 @@
-package com.ciceroinfo;
+package com.ciceroinfo.consumer;
 
 import java.util.concurrent.Executors;
 

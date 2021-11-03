@@ -1,6 +1,8 @@
 package com.ciceroinfo;
 
+import com.ciceroinfo.consumer.ConsumerService;
 import com.ciceroinfo.consumer.KafkaService;
+import com.ciceroinfo.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.File;
@@ -9,23 +11,16 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class ReadingReportService<T> {
+public class ReadingReportService<T> implements ConsumerService<User> {
 
 
     private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var readingReportService = new ReadingReportService();
-        try (var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
-                "ECOMMERCE_USER_GENERATE_READING_REPORT",
-                readingReportService::parse,
-                Map.of())) {
-            service.run();
-        }
+        new ServiceRunner(ReadingReportService::new).start(5);
     }
-
-    private void parse(ConsumerRecord<String, Message<User>> record) throws ExecutionException, InterruptedException,
-            IOException {
+    @Override
+    public void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
         System.out.println("----------------------------");
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Processing REPORT: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
@@ -42,5 +37,15 @@ public class ReadingReportService<T> {
         System.out.println("Report processed");
         System.out.println("----------------------------");
 
+    }
+    
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_USER_GENERATE_READING_REPORT";
+    }
+    
+    @Override
+    public String getConsumerGroup() {
+        return ReadingReportService.class.getSimpleName();
     }
 }

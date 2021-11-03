@@ -1,11 +1,8 @@
-package com.ciceroinfo;
-
-import com.ciceroinfo.consumer.KafkaService;
+package com.ciceroinfo.consumer;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 public class ServiceProvider<T> implements Callable<Void> {
     private final ServiceFactory<T> factory;

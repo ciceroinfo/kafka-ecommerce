@@ -1,12 +1,10 @@
 package com.ciceroinfo;
 
-import com.ciceroinfo.consumer.KafkaService;
+import com.ciceroinfo.consumer.ConsumerService;
+import com.ciceroinfo.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class EmailService implements ConsumerService<String> {
     
