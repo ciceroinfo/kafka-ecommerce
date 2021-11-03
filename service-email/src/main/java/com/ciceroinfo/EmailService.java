@@ -1,5 +1,6 @@
 package com.ciceroinfo;
 
+import com.ciceroinfo.consumer.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.Map;

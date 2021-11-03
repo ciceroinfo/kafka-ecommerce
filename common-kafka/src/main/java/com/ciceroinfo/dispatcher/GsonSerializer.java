@@ -1,5 +1,7 @@
-package com.ciceroinfo;
+package com.ciceroinfo.dispatcher;
 
+import com.ciceroinfo.Message;
+import com.ciceroinfo.MessageAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.kafka.common.serialization.Serializer;

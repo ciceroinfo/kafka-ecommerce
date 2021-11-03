@@ -1,5 +1,7 @@
 package com.ciceroinfo;
 
+import com.ciceroinfo.dispatcher.KafkaDispatcher;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,14 +14,11 @@ import java.util.concurrent.ExecutionException;
 public class NewOrderServlet extends HttpServlet {
     
     KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
-    KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
     
     @Override
     public void destroy() {
         super.destroy();
         orderDispatcher.close();
-        ;
-        emailDispatcher.close();
     }
     
     @Override
@@ -34,15 +33,10 @@ public class NewOrderServlet extends HttpServlet {
             
             orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), order);
             
-            String emailCode = "Thank you for order! We are processing your order!";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), emailCode);
-            
             System.out.println("New order sent successfully");
             resp.setStatus(HttpServletResponse.SC_CREATED);
             resp.getWriter().println("New order sent successfully");
-        } catch (ExecutionException e) {
-            throw new ServletException(e);
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new ServletException(e);
         }
     }

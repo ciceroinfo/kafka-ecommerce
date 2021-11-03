@@ -1,5 +1,7 @@
 package com.ciceroinfo;
 
+import com.ciceroinfo.consumer.KafkaService;
+import com.ciceroinfo.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;

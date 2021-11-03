@@ -1,5 +1,7 @@
-package com.ciceroinfo;
+package com.ciceroinfo.dispatcher;
 
+import com.ciceroinfo.CorrelationId;
+import com.ciceroinfo.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -33,8 +35,8 @@ public class KafkaDispatcher<T> implements Closeable {
         future.get();
     }
     
-    protected Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId id, T payload) {
-        var value = new Message<>(id, payload);
+    public Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId id, T payload) {
+        var value = new Message<>(id.continueWith("_" + topic), payload);
         var record = new ProducerRecord<>(topic, key, value);
         
         Callback callback = (data, ex) -> {
