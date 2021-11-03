@@ -5,34 +5,27 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-public class EmailService {
-
+public class EmailService implements ConsumerService<String> {
+    
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var emailService = new EmailService();
-        try (var service = new KafkaService(EmailService.class.getSimpleName(),
-                "ECOMMERCE_SEND_EMAIL",
-                emailService::parse,
-                Map.of())) {
-            service.run();
-        }
-
-        sleep(1000);
+        new ServiceRunner(EmailService::new).start(5);
     }
-
-    private void parse(ConsumerRecord<String, Message<String>> record) {
+    
+    public String getTopic() {
+        return "ECOMMERCE_SEND_EMAIL";
+    }
+    
+    public String getConsumerGroup() {
+        return EmailService.class.getSimpleName();
+    }
+    
+    public void parse(ConsumerRecord<String, Message<String>> record) {
         System.out.println("----------------------------");
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Sending EMAIL: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
         System.out.println("----------------------------");
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            // ignoring
-            e.printStackTrace();
-        }
     }
 }
