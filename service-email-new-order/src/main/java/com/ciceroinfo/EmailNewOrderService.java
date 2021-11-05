@@ -1,6 +1,8 @@
 package com.ciceroinfo;
 
+import com.ciceroinfo.consumer.ConsumerService;
 import com.ciceroinfo.consumer.KafkaService;
+import com.ciceroinfo.consumer.ServiceRunner;
 import com.ciceroinfo.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -8,22 +10,27 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class EmailNewOrderService<T> {
+public class EmailNewOrderService<T> implements ConsumerService<Order> {
     
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
     private KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
     
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var emailService = new EmailNewOrderService();
-        try (var service = new KafkaService<>(EmailNewOrderService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                emailService::parse,
-                Map.of())) {
-            service.run();
-        }
+    public static void main(String[] args) {
+        new ServiceRunner(EmailNewOrderService::new).start(1);
     }
     
-    private void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+    
+    @Override
+    public String getConsumerGroup() {
+        return EmailNewOrderService.class.getSimpleName();
+    }
+    
+    @Override
+    public void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
         System.out.println("----------------------------");
         System.out.println("topic[" + record.topic() + "] ::: partition[" + record.partition() + "] ::: offset:[" + record.offset() + "] ::: timestamp:[" + record.timestamp() + "]");
         System.out.println("Processing ORDER EMAIL: KEY[" + record.key() + "] ::: VALUE[" + record.value() + "]");
