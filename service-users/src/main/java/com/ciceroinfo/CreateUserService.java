@@ -4,27 +4,18 @@ import com.ciceroinfo.consumer.ConsumerService;
 import com.ciceroinfo.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
 
 public class CreateUserService implements ConsumerService<Order> {
     
-    private final Connection connection;
+    private final LocalDatabase database;
     
-    private CreateUserService() throws SQLException {
-        String url = "jdbc:sqlite:service-users/target/users_database.db";
-        this.connection = DriverManager.getConnection(url);
-        
-        try {
-            connection.createStatement().execute("create table Users (" +
-                    "uuid varchar(200) primary key, " +
-                    "email varchar(200))");
-        } catch (SQLException e) {
-            // be careful, the SQL could be wrong, be reallly careful
-            e.printStackTrace();
-        }
+    public CreateUserService() throws SQLException {
+        this.database = new LocalDatabase("users_database");
+        this.database.createIfNotExists("create table Users (" +
+                "uuid varchar(200) primary key, " +
+                "email varchar(200))");
     }
     
     public static void main(String[] args) {
@@ -63,18 +54,18 @@ public class CreateUserService implements ConsumerService<Order> {
     
     
     private void insertNewUser(String email) throws SQLException {
-        var insert = connection.prepareStatement("insert into Users(uuid, email) values (?, ?)");
         var uuid = UUID.randomUUID().toString();
-        insert.setString(1, uuid);
-        insert.setString(2, email);
-        insert.execute();
-        System.out.println("User " + uuid + " e " + email + " added");
+        var success = database.update("insert into Users(uuid, email) values (?, ?)", uuid, email);
+        
+        if (success) {
+            System.out.println("User " + uuid + " e " + email + " added");
+        } else {
+            System.out.println("User " + uuid + " e " + email + " NOT added");
+        }
     }
     
     private boolean isNewUser(String email) throws SQLException {
-        var exists = connection.prepareStatement("select uuid from Users where email = ? limit 1");
-        exists.setString(1, email);
-        var results = exists.executeQuery();
+        var results = database.query("select uuid from Users where email = ? limit 1", email);
         return !results.next();
     }
 }
