@@ -16,7 +16,7 @@ public class FraudDetectorService implements ConsumerService<Order> {
     
     public FraudDetectorService() throws SQLException {
         this.database = new LocalDatabase("frauds_database");
-        this.database.createIfNotExists("create table Orders (" +
+        this.database.createIfNotExists("create table IF NOT EXISTS Orders (" +
                 "uuid varchar(200) primary key, " +
                 "is_fraud boolean)");
     }

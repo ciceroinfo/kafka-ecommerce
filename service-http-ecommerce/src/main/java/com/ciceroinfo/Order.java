@@ -12,7 +12,11 @@ public class Order {
         this.orderId = orderId;
         this.amount = amount;
     }
-
+    
+    public String getOrderId() {
+        return orderId;
+    }
+    
     @Override
     public String toString() {
         return "Order{" +

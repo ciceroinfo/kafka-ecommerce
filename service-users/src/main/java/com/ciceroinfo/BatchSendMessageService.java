@@ -22,7 +22,7 @@ public class BatchSendMessageService {
         this.connection = DriverManager.getConnection(url);
         
         try {
-            connection.createStatement().execute("create table Users (" +
+            connection.createStatement().execute("create table IF NOT EXISTS Users (" +
                     "uuid varchar(200) primary key, " +
                     "email varchar(200))");
         } catch (SQLException e) {

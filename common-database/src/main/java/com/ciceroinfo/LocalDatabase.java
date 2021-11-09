@@ -1,5 +1,6 @@
 package com.ciceroinfo;
 
+import java.io.IOException;
 import java.sql.*;
 
 public class LocalDatabase {
@@ -36,5 +37,13 @@ public class LocalDatabase {
             preparedStatement.setString(i + 1, params[i]);
         }
         return preparedStatement;
+    }
+    
+    public void close() throws IOException {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 }
