@@ -33,3 +33,9 @@ bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe
 
 #mostrar o status do consumo dos grupos
 bin/kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 --all-groups --describe
+
+# Simulação para novas Ordens
+http://localhost:8080/new?email=cicero2@ciceroinfo.com&amount=1230&uuid=3
+
+# Simulação para geração de reports
+http://localhost:8080/admin/generate-reports
